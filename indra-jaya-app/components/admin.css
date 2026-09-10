@@ -1,0 +1,251 @@
+/* ============================================================
+   Admin : login (tampilan saja, reuse token dari index.css)
+   ============================================================ */
+
+.admin-auth {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  background: var(--paper);
+  overflow-x: clip;
+}
+
+/* --- brand panel (kiri) -------------------------------------- */
+
+.admin-auth__brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3rem;
+  padding: clamp(2rem, 4vw, 4rem);
+  background: var(--ink);
+  color: rgba(255, 255, 255, 0.72);
+  overflow: hidden;
+}
+.admin-auth__brand::after {
+  content: '';
+  position: absolute;
+  right: -18%;
+  bottom: -18%;
+  width: 60%;
+  height: 60%;
+  background: var(--red);
+  opacity: 0.16;
+  border-radius: 50%;
+  filter: blur(10px);
+}
+.admin-brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: fit-content;
+}
+.admin-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.admin-brand__text {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.admin-brand__text em {
+  font-style: normal;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.admin-auth__pitch { position: relative; max-width: 30ch; }
+.admin-auth__pitch h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.admin-auth__pitch p {
+  margin-top: 1rem;
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+.admin-auth__foot {
+  position: relative;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.04em;
+}
+
+/* --- form panel (kanan) -------------------------------------- */
+
+.admin-auth__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: clamp(2rem, 4vw, 4rem);
+  min-width: 0;
+}
+.admin-card {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: clamp(1.8rem, 3vw, 2.6rem);
+}
+.admin-card__tag {
+  display: inline-block;
+  font-family: var(--display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--red-ink);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+}
+.admin-card__title {
+  margin-top: 1rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.7rem;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.admin-card__sub {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+}
+
+.admin-form {
+  margin-top: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.admin-field { display: flex; flex-direction: column; gap: 0.45rem; }
+.admin-field__label {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.admin-field__wrap { position: relative; display: flex; min-width: 0; }
+.admin-field__wrap input { min-width: 0; flex: 1 1 auto; }
+.admin-field input {
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 0.98rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.8rem 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.admin-field__wrap input { padding-right: 6.2rem; }
+.admin-field input::placeholder { color: var(--ink-3); }
+.admin-field input:focus {
+  outline: none;
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--red) 55%, var(--line));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--red) 14%, transparent);
+}
+.admin-field__toggle {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--ink-2);
+  font-family: var(--display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.7rem 0.7rem;
+  border-radius: 7px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+.admin-field__toggle:hover { color: var(--ink); background: var(--paper-2); }
+
+.admin-submit {
+  margin-top: 0.4rem;
+  width: 100%;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.9rem 1.5rem;
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease;
+}
+.admin-submit:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.admin-submit:active { transform: translateY(0); }
+
+.admin-note {
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--ink-3);
+  padding: 0.75rem 0.9rem;
+  background: var(--paper-2);
+  border-radius: 10px;
+  border: 1px solid var(--line-soft);
+}
+
+.admin-back {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.5rem;
+  font-family: var(--display);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  transition: color 0.2s ease;
+}
+.admin-back:hover { color: var(--ink); }
+
+/* --- responsive ---------------------------------------------- */
+
+@media (max-width: 860px) {
+  .admin-auth { grid-template-columns: minmax(0, 1fr); }
+  .admin-auth__brand {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem clamp(1.25rem, 5vw, 2rem);
+  }
+  .admin-auth__pitch { display: none; }
+  .admin-auth__foot { display: none; }
+  .admin-auth__panel { padding: clamp(2rem, 8vw, 4rem) 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-submit, .admin-field input, .admin-field__toggle { transition: none; }
+}

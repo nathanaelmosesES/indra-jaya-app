@@ -1,0 +1,166 @@
+/* ============================================================
+   Indra Jaya : design system
+   Art direction: clean editorial light.
+   One brand anchor (SUMATO red), earned neutrals, generous space.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* Brand anchor, spent sparingly (danger / price / CTA only). */
+  --red: #d81e22;
+  --red-ink: #b0141a;       /* red that stays legible as text on paper */
+  --red-deep: #7f0f12;
+
+  /* Earned neutrals. */
+  --ink: #17140f;           /* near-black, warm */
+  --ink-2: #5b544a;         /* muted body */
+  --ink-3: #8a8177;         /* captions / meta */
+  --paper: #f6f2ea;         /* warm off-white canvas */
+  --paper-2: #efe9dd;       /* recessed block */
+  --card: #ffffff;
+  --line: rgba(23, 20, 15, 0.12);
+  --line-soft: rgba(23, 20, 15, 0.07);
+
+  --shadow-sm: 0 1px 2px rgba(23, 20, 15, 0.05);
+  --shadow-md: 0 18px 40px -24px rgba(23, 20, 15, 0.35);
+  --shadow-lg: 0 40px 80px -40px rgba(23, 20, 15, 0.45);
+
+  --display: 'Space Grotesk', system-ui, sans-serif;
+  --sans: 'IBM Plex Sans', system-ui, 'Segoe UI', sans-serif;
+
+  /* Fluid type scale (major-third-ish, clamped). */
+  --fs-eyebrow: 0.78rem;
+  --fs-small: 0.86rem;
+  --fs-body: 1.02rem;
+  --fs-lead: clamp(1.1rem, 1.6vw, 1.32rem);
+  --fs-h3: clamp(1.25rem, 2.2vw, 1.6rem);
+  --fs-h2: clamp(1.9rem, 4vw, 3rem);
+  --fs-display: clamp(2.7rem, 7.2vw, 6rem);
+
+  /* Rhythm. */
+  --gutter: clamp(1.25rem, 5vw, 6rem);
+  --section-y: clamp(4.5rem, 11vh, 9rem);
+  --radius: 14px;
+  --radius-lg: 22px;
+  --maxw: 1240px;
+
+  color-scheme: light;
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  background: var(--paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  overflow-x: hidden;
+  min-height: 100svh;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--display);
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { margin: 0; text-wrap: pretty; }
+
+a { color: inherit; text-decoration: none; }
+
+img { display: block; max-width: 100%; height: auto; }
+
+button { font-family: inherit; cursor: pointer; }
+
+::selection { background: var(--red); color: #fff; }
+
+/* --- shared primitives ------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.eyebrow {
+  font-family: var(--display);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--red-ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.eyebrow::before {
+  content: '';
+  width: 26px;
+  height: 1.5px;
+  background: var(--red);
+  display: inline-block;
+}
+
+.btn {
+  --btn-bg: var(--ink);
+  --btn-fg: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn:active { transform: translateY(0); }
+.btn--red { --btn-bg: var(--red); --btn-fg: #fff; }
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--ink);
+  border-color: var(--line);
+}
+.btn--ghost:hover { background: var(--ink); color: #fff; }
+.btn svg { width: 18px; height: 18px; }
+
+/* --- scroll reveal ----------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .btn { transition: none; }
+  * { animation-duration: 0.001ms !important; }
+}
