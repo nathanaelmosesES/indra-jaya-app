@@ -15,11 +15,16 @@ build: `bun run build`, start: `bun run start`.
 ```
 app/layout.tsx      metadata SEO (title/description/OG), lang="id", viewport export
 app/page.tsx        landing (server) -> render <Landing/> (SSG)
-app/admin/page.tsx  /admin (server, robots noindex) -> render <AdminLogin/>
+app/admin/page.tsx  /admin login (dynamic, noindex); redirect ke dashboard bila sudah login
+app/admin/actions.ts      server actions: login, logout, buat/hapus akun internal
+app/admin/dashboard, app/admin/users   halaman setelah login (users khusus developer)
 app/globals.css     design token + base (masih @import Google Fonts)
 components/Landing.tsx    'use client', semua section + scroll-reveal; Landing.css
-components/AdminLogin.tsx 'use client', login UI; admin.css; pakai next/link
+components/AdminLogin.tsx 'use client', login username+password; admin.css
+components/AdminShell.tsx, CreateUserForm.tsx   kerangka admin + form akun
 lib/                supabase (env NEXT_PUBLIC_*), database, storage, useReveal
+lib/auth.ts, session.ts, supabase-admin.ts      auth internal (server-only)
+scripts/create-password/  hash scrypt; `bunx create-password <pw>` (devDependency file:)
 public/assets/      gambar produk .webp, dirujuk via string URL (bukan import)
 ```
 
@@ -28,22 +33,38 @@ public/assets/      gambar produk .webp, dirujuk via string URL (bukan import)
 - **JANGAN pakai em-dash (—) di mana pun**: copy, balasan chat, komentar kode.
   Ganti dengan koma/titik/"dan"/"serta" atau middle dot (·). Cek: grep `—` di
   `app`, `components`, `lib`. (Ini permintaan tegas pemilik.)
+- **JANGAN menambah comment di kode, sama sekali** (termasuk JSDoc, comment
+  SQL/CSS, dan penjelasan di `.env`). Kode harus bisa dipahami tanpa comment:
+  nama variabel/fungsi yang jelas, konstanta bernama untuk angka dan string
+  ajaib, fungsi kecil dengan satu tugas. Penjelasan setup ditaruh di
+  `README.md`/`TODO.md`, bukan di kode. (Permintaan tegas pemilik.)
 - **Anti-"AI slop"**: arah desain "clean editorial light". Satu anchor warna
   merah SUMATO `#d81e22` (hemat, hanya untuk bahaya/harga/CTA), netral off-white
   hangat + near-black, whitespace lega, hierarki tipografi kuat. Motion hanya
   reveal-on-scroll halus + satu float hero; hormati `prefers-reduced-motion`.
   Setiap perubahan landing harus bisa dipertanggungjawabkan terhadap aturan ini.
+- **Mobile-first dan UI/UX best practice di setiap layar** (app ini paling sering
+  dibuka di HP). Minimum: layout mulai dari 360px tanpa scroll horizontal; input
+  font-size >= 16px (cegah auto-zoom iOS) dan tinggi >= 48px; target sentuh >= 44px;
+  label terlihat (bukan placeholder); hint + error per field (`aria-invalid`,
+  `aria-describedby`), fokus ke field salah pertama; nilai form tidak hilang saat
+  error; state loading/disabled/sukses/kosong; aksi berbahaya pakai konfirmasi;
+  password baru selalu dengan konfirmasi + tombol tampilkan; `autocomplete`,
+  `enterkeyhint`, `inputmode` yang tepat; `focus-visible` jelas; hormati
+  `prefers-reduced-motion`. Validasi yang sama dipakai di client dan server.
+  Cek di lebar HP (390px) dan desktop sebelum dianggap selesai.
 - **Copy Bahasa Indonesia**, jujur (tanpa lorem/typo).
 - **CTA WhatsApp** ke `628118998098` (tampil `+62 811-8998-098`).
 
 ## Status saat ini
 
-- **Auth admin BELUM dipasang** (sengaja). `/admin` masih UI saja; titik sambung
-  `TODO(auth)` di `components/AdminLogin.tsx` untuk Supabase `signInWithPassword`.
-- **Data produk masih hard-coded** di `components/Landing.tsx`. Rencana pindah ke
-  tabel `products` di Supabase (schema sudah dirancang, migration belum ditulis;
-  keputusan terbuka: specs jsonb vs kolom, gambar Storage vs URL, kategori dinamis).
-- **Deploy target: Vercel** (native Next; kedua route prerender statis).
+- **Auth admin: custom, bukan Supabase Auth.** Akun developer dari `.env`
+  (`DEV_ADMIN_USERNAME`, `DEV_ADMIN_PASSWORD_HASH`), owner/staff di tabel
+  `internal_users` (hanya diakses server lewat `SUPABASE_SECRET_KEY`). Sesi =
+  cookie HMAC (`ADMIN_SESSION_SECRET`). Hanya developer yang membuat akun.
+- **Data produk masih hard-coded** di `components/Landing.tsx`. Tabel `products`
+  sudah ada di Supabase (specs kolom tetap, gambar di bucket `product-images`).
+- **Deploy target: Vercel.** `/` statis, route `/admin/*` dinamis.
 
 ## Verifikasi (browser remote tak bisa akses localhost-ku)
 

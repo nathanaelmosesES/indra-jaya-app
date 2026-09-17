@@ -44,6 +44,7 @@ create index if not exists products_active_sort_idx
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
   new.updated_at = now();
@@ -56,9 +57,26 @@ create trigger products_set_updated_at
   before update on public.products
   for each row execute function public.set_updated_at();
 
+-- --- Admin ------------------------------------------------------------------
+
+-- Admin = user dengan app_metadata.role = 'admin'. app_metadata hanya bisa
+-- diubah lewat dashboard/SQL/service role, bukan oleh user sendiri, jadi
+-- akun hasil signup biasa tidak otomatis jadi admin.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+set search_path = ''
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
+
 -- --- Row Level Security -----------------------------------------------------
 
 alter table public.products enable row level security;
+
+grant select on public.products to anon, authenticated;
+grant insert, update, delete on public.products to authenticated;
 
 -- Publik (anon + authenticated) hanya boleh baca produk aktif.
 drop policy if exists products_select_active on public.products;
@@ -67,15 +85,14 @@ create policy products_select_active
   for select
   using (is_active = true);
 
--- Admin (siapa pun yang authenticated; hanya pemilik yang punya akun)
--- boleh baca semua + tulis penuh.
+-- Admin boleh baca semua + tulis penuh.
 drop policy if exists products_admin_all on public.products;
 create policy products_admin_all
   on public.products
   for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
 
 -- --- Storage: bucket product-images (public read) ---------------------------
 
@@ -90,25 +107,25 @@ create policy product_images_public_read
   for select
   using (bucket_id = 'product-images');
 
--- Tulis/ubah/hapus hanya untuk authenticated (admin).
+-- Tulis/ubah/hapus hanya untuk admin.
 drop policy if exists product_images_admin_write on storage.objects;
 create policy product_images_admin_write
   on storage.objects
   for insert
   to authenticated
-  with check (bucket_id = 'product-images');
+  with check (bucket_id = 'product-images' and (select public.is_admin()));
 
 drop policy if exists product_images_admin_update on storage.objects;
 create policy product_images_admin_update
   on storage.objects
   for update
   to authenticated
-  using (bucket_id = 'product-images')
-  with check (bucket_id = 'product-images');
+  using (bucket_id = 'product-images' and (select public.is_admin()))
+  with check (bucket_id = 'product-images' and (select public.is_admin()));
 
 drop policy if exists product_images_admin_delete on storage.objects;
 create policy product_images_admin_delete
   on storage.objects
   for delete
   to authenticated
-  using (bucket_id = 'product-images');
+  using (bucket_id = 'product-images' and (select public.is_admin()));

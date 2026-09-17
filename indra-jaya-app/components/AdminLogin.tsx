@@ -1,25 +1,13 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useActionState, useState } from 'react'
 import Link from 'next/link'
+import { login } from '@/app/admin/actions'
 import './admin.css'
 
-/**
- * Admin login, tampilan saja.
- *
- * Autentikasi belum diaktifkan (sesuai permintaan). Submit sengaja tidak
- * memanggil Supabase Auth apa pun; ia hanya menampilkan catatan bahwa auth
- * masih tahap berikutnya. Tempat menyambungkan auth ditandai dengan TODO.
- */
 function AdminLogin() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [state, formAction, pending] = useActionState(login, undefined)
   const [showPassword, setShowPassword] = useState(false)
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    // TODO(auth): sambungkan ke Supabase Auth (signInWithPassword) di sini.
-  }
 
   return (
     <div className="admin-auth">
@@ -42,22 +30,22 @@ function AdminLogin() {
 
       <main className="admin-auth__panel">
         <div className="admin-card">
-          <span className="admin-card__tag">Pratinjau</span>
+          <span className="admin-card__tag">Internal</span>
           <h2 className="admin-card__title">Masuk ke Dashboard</h2>
           <p className="admin-card__sub">
-            Gunakan akun admin untuk mengelola produk.
+            Gunakan akun yang dibuatkan developer.
           </p>
 
-          <form className="admin-form" onSubmit={handleSubmit} noValidate>
+          <form className="admin-form" action={formAction}>
             <label className="admin-field">
-              <span className="admin-field__label">Email</span>
+              <span className="admin-field__label">Username</span>
               <input
-                type="email"
-                name="email"
+                type="text"
+                name="username"
                 autoComplete="username"
-                placeholder="admin@indrajaya.co.id"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                autoCapitalize="none"
+                spellCheck={false}
+                required
               />
             </label>
 
@@ -68,9 +56,7 @@ function AdminLogin() {
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   autoComplete="current-password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
@@ -83,14 +69,15 @@ function AdminLogin() {
               </div>
             </label>
 
-            <button type="submit" className="admin-submit">
-              Masuk
+            <button type="submit" className="admin-submit" disabled={pending}>
+              {pending ? 'Memeriksa...' : 'Masuk'}
             </button>
 
-            <p className="admin-note" role="status">
-              Autentikasi belum diaktifkan. Halaman ini masih tahap tampilan;
-              login akan berfungsi setelah auth dipasang.
-            </p>
+            {state?.error && (
+              <p className="admin-note admin-note--error" role="alert">
+                {state.error}
+              </p>
+            )}
           </form>
         </div>
 
