@@ -10,12 +10,13 @@ const ROLE_LABEL: Record<CurrentUser['role'], string> = {
   staff: 'Staff',
 }
 
-type AdminPage = 'dashboard' | 'users'
+type AdminPage = 'dashboard' | 'users' | 'products' | 'opname' | 'transactions'
 
 type AdminShellProps = { user: CurrentUser; currentPage: AdminPage; children: ReactNode }
 
 function AdminShell({ user, currentPage, children }: AdminShellProps) {
   const ariaCurrent = (page: AdminPage) => (page === currentPage ? 'page' : undefined)
+  const canManageInventory = user.role === 'developer' || user.role === 'owner'
 
   return (
     <div className="admin-shell">
@@ -29,6 +30,19 @@ function AdminShell({ user, currentPage, children }: AdminShellProps) {
           <Link href="/admin/dashboard" aria-current={ariaCurrent('dashboard')}>
             Dashboard
           </Link>
+          {canManageInventory && (
+            <>
+              <Link href="/admin/products" aria-current={ariaCurrent('products')}>
+                Produk
+              </Link>
+              <Link href="/admin/opname" aria-current={ariaCurrent('opname')}>
+                Opname
+              </Link>
+              <Link href="/admin/transactions" aria-current={ariaCurrent('transactions')}>
+                Transaksi
+              </Link>
+            </>
+          )}
           {user.role === 'developer' && (
             <Link href="/admin/users" aria-current={ariaCurrent('users')}>
               Akun internal

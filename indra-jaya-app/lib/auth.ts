@@ -82,3 +82,7 @@ export async function requireUser(allowedRoles?: Role[]) {
 export function requireDeveloper() {
   return requireUser(['developer'])
 }
+
+export function requireOwner() {
+  return requireUser(['developer', 'owner'])
+}
