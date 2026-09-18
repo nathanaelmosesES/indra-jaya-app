@@ -13,9 +13,11 @@ export type Session = {
 
 type NewSession = Omit<Session, 'expiresAtEpochSeconds'>
 
-const SESSION_COOKIE = 'ij_admin_session'
+const ACCESS_COOKIE = 'ij_access'
+const REFRESH_COOKIE = 'ij_refresh'
 const SESSION_COOKIE_PATH = '/admin'
-const SESSION_DURATION_SECONDS = 8 * 60 * 60
+const ACCESS_DURATION_SECONDS = 30 * 60
+const REFRESH_DURATION_SECONDS = 7 * 24 * 60 * 60
 const MIN_SECRET_LENGTH = 32
 
 function getSigningSecret() {
@@ -46,8 +48,11 @@ function toSignedToken(session: Session) {
 }
 
 function fromSignedToken(token: string): Session | null {
-  const [payload, signature] = token.split('.')
-  if (!payload || !signature || !hasValidSignature(payload, signature)) return null
+  const dotIdx = token.lastIndexOf('.')
+  if (dotIdx < 1) return null
+  const payload = token.slice(0, dotIdx)
+  const signature = token.slice(dotIdx + 1)
+  if (!hasValidSignature(payload, signature)) return null
 
   try {
     const session: Session = JSON.parse(Buffer.from(payload, 'base64url').toString())
@@ -57,28 +62,44 @@ function fromSignedToken(token: string): Session | null {
   }
 }
 
+function makeAccessToken(session: NewSession): string {
+  return toSignedToken({ ...session, expiresAtEpochSeconds: nowInEpochSeconds() + ACCESS_DURATION_SECONDS })
+}
+
+function makeRefreshToken(session: NewSession): string {
+  return toSignedToken({ ...session, expiresAtEpochSeconds: nowInEpochSeconds() + REFRESH_DURATION_SECONDS })
+}
+
 export async function createSession(newSession: NewSession) {
-  const session = {
-    ...newSession,
-    expiresAtEpochSeconds: nowInEpochSeconds() + SESSION_DURATION_SECONDS,
-  }
   const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE, toSignedToken(session), {
+  const base = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'lax' as const,
     path: SESSION_COOKIE_PATH,
-    maxAge: SESSION_DURATION_SECONDS,
+  }
+  cookieStore.set(ACCESS_COOKIE, makeAccessToken(newSession), {
+    ...base,
+    maxAge: ACCESS_DURATION_SECONDS,
+  })
+  cookieStore.set(REFRESH_COOKIE, makeRefreshToken(newSession), {
+    ...base,
+    maxAge: REFRESH_DURATION_SECONDS,
   })
 }
 
-export async function readSession() {
+export async function readSession(): Promise<Session | null> {
   const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  return token ? fromSignedToken(token) : null
+  const accessToken = cookieStore.get(ACCESS_COOKIE)?.value
+  if (accessToken) {
+    const session = fromSignedToken(accessToken)
+    if (session) return session
+  }
+  return null
 }
 
 export async function deleteSession() {
   const cookieStore = await cookies()
-  cookieStore.delete({ name: SESSION_COOKIE, path: SESSION_COOKIE_PATH })
+  cookieStore.delete({ name: ACCESS_COOKIE, path: SESSION_COOKIE_PATH })
+  cookieStore.delete({ name: REFRESH_COOKIE, path: SESSION_COOKIE_PATH })
 }
